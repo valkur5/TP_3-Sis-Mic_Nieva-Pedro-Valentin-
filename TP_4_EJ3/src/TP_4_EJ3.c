@@ -17,12 +17,14 @@ void UartRx();
 /*=====[Definición de variables globales]==============================*/
 int tecla=0;
 bool_t T1=false,T2=false,T3=false,T4=false;
-typedef enum commandsEnum {
+
+typedef enum commandsEnum { //creamos nuestras funciones, de manera que cuando reciba por uart alguna de esas letras, suceda algo
 COMMAND_LED1_TOGGLE='a',
 COMMAND_LED2_TOGGLE='s',
 COMMAND_LED3_TOGGLE='d',
 COMMAND_LED4_TOGGLE='f'
 } commands_t;
+
 /*=====[Main function, program entry point after power on or reset]==========*/
 
 int main( void )
@@ -33,6 +35,12 @@ int main( void )
 
    // ----- Repeat for ever -------------------------
    while( true ) {
+	   /*
+	   En el bucle se analiza constantemente las 4 teclas, que cada tecla indica una acción, que es lo que
+	   nosotros tomaremos como nuestro estado de la máquina de estados.
+	   
+	   También la plaqueta estará revisando cuando le llegue un dato por la uart, para actuar según lo que reciba
+	   */
 	   tecla1();
 	   tecla2();
 	   tecla3();
@@ -45,7 +53,7 @@ int main( void )
    // case of a PC program.
    return 0;
 }
-void UartRx(){
+void UartRx(){ //Esta función es la que se encarga de encender el led correspondiente según el comando recibido
 	uint8_t uartCharRx = uartRxRead(UART_USB);
 	switch(uartCharRx){
 		case COMMAND_LED1_TOGGLE:
@@ -67,12 +75,12 @@ void tecla1(){
 	if(gpioRead(TEC1)!= true){
 		for(int i=0;i<2000000;i++); //Debouce del botón
 		if(gpioRead(TEC1)!= true && T1==false){ //Si la tecla está verdaderamente presionada y el led está apagado, ingreso al if
-		   T1=true;//indicamos que el led está encendido
+		   T1=true;//indicamos que la tecla fue apretada
 		   uartWriteString( UART_USB, "Tecla apretada: TEC1 \n" ); //Enviamos mensaje indicando que la tecla fue preisonada
 
 		}
    }else if(gpioRead(TEC1)==true && T1==true){ //Si la tecla no está presionada y el led está encendido, ingresa a este if
-	   T1=false; //Indicamos que el led está apagado
+	   T1=false; //Indicamos que la tecla fue liberada
 	   uartWriteString( UART_USB, "Tecla liberada: TEC1 \n" );//Enviamos mensaje indicando que la tecla fue liberada
    }
 }
